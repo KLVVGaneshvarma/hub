@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VL Fashion Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap%22 rel="stylesheet">
+<style>
+  :root { --gold:#C9A84C; --maroon:#800020; --maroon-dark:#5a0016; --cream:#FDF6E3; --gray:#f5f5f5; --text:#1a1a1a; --muted:#666; --border:#e0e0e0; --radius:12px; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Lato',sans-serif; background:var(--cream); color:var(--text); }
+ 
+  nav { background:var(--maroon); padding:0 24px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; box-shadow:0 2px 12px rgba(0,0,0,.15); }
+  .brand { font-family:'Playfair Display',serif; color:var(--gold); font-size:22px; padding:16px 0; }
+  .ig-nav { display:inline-flex; align-items:center; gap:7px; background:var(--gold); color:#fff; font-size:13px; font-weight:700; padding:8px 16px; border-radius:99px; text-decoration:none; }
+ 
+  .hero { background:linear-gradient(135deg,var(--maroon-dark),var(--maroon)); color:#fff; text-align:center; padding:60px 24px 50px; }
+  .badge { display:inline-block; background:var(--gold); color:#fff; font-size:12px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:5px 14px; border-radius:99px; margin-bottom:18px; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:clamp(26px,5vw,46px); margin-bottom:12px; }
+  .hero p { color:rgba(255,255,255,.8); font-size:16px; max-width:480px; margin:0 auto 24px; }
+  .hero-ig { display:inline-flex; align-items:center; gap:8px; background:#fff; color:var(--maroon); font-weight:700; padding:12px 24px; border-radius:99px; text-decoration:none; font-size:15px; transition:transform .2s; }
+  .hero-ig:hover { transform:scale(1.04); }
+ 
+  .toolbar { background:#fff; border-bottom:1px solid var(--border); padding:14px 24px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; position:sticky; top:57px; z-index:90; }
+  .search { flex:1; min-width:160px; max-width:300px; padding:9px 14px 9px 36px; border:1.5px solid var(--border); border-radius:99px; font-size:14px; font-family:'Lato',sans-serif; outline:none; background:var(--gray) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 12px center; }
+  .search:focus { border-color:var(--gold); background-color:#fff; }
+  .fbtn { padding:7px 15px; border-radius:99px; border:1.5px solid var(--border); background:#fff; font-size:13px; cursor:pointer; font-family:'Lato',sans-serif; transition:all .2s; white-space:nowrap; }
+  .fbtn.on { background:var(--maroon); color:#fff; border-color:var(--maroon); }
+  .rcount { margin-left:auto; font-size:13px; color:var(--muted); }
+ 
+  .container { max-width:1100px; margin:0 auto; padding:28px 20px 60px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:20px; }
+ 
+  .card { background:#fff; border-radius:var(--radius); overflow:hidden; border:1px solid var(--border); transition:transform .2s,box-shadow .2s; display:flex; flex-direction:column; cursor:pointer; }
+  .card:hover { transform:translateY(-4px); box-shadow:0 12px 32px rgba(0,0,0,.1); }
+  .cimg { width:100%; aspect-ratio:1; object-fit:cover; display:block; }
+  .cph { width:100%; aspect-ratio:1; background:linear-gradient(135deg,#f0e6d3,#e8d5b7); display:flex; align-items:center; justify-content:center; font-size:52px; }
+  .cbody { padding:14px; flex:1; display:flex; flex-direction:column; }
+  .ccat { font-size:11px; color:var(--gold); font-weight:700; letter-spacing:1px; text-transform:uppercase; margin-bottom:5px; }
+  .cname { font-family:'Playfair Display',serif; font-size:16px; font-weight:700; margin-bottom:6px; line-height:1.3; }
+  .cdesc { font-size:13px; color:var(--muted); line-height:1.5; flex:1; margin-bottom:12px; display:-webkit-box; line-clamp:2; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .cfoot { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .cprice { font-size:18px; font-weight:700; color:var(--maroon); }
+  .obtn { display:inline-flex; align-items:center; gap:5px; background:var(--maroon); color:#fff; border:none; padding:8px 13px; border-radius:99px; font-size:12px; font-weight:700; cursor:pointer; text-decoration:none; transition:background .2s; white-space:nowrap; }
+  .obtn:hover { background:var(--maroon-dark); }
+ 
+  .skeleton { background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%); background-size:200% 100%; animation:shimmer 1.2s infinite; border-radius:var(--radius); }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  .skel-card { height:320px; }
+ 
+  .empty { text-align:center; padding:80px 20px; color:var(--muted); grid-column:1/-1; }
+  .empty .eico { font-size:56px; margin-bottom:16px; }
+  .empty h3 { font-family:'Playfair Display',serif; font-size:22px; color:var(--text); margin-bottom:8px; }
+ 
+  .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:500; display:none; align-items:center; justify-content:center; padding:20px; }
+  .modal-bg.open { display:flex; }
+  .modal { background:#fff; border-radius:16px; padding:28px; max-width:440px; width:100%; text-align:center; position:relative; max-height:90vh; overflow-y:auto; }
+  .mimg { width:100%; max-height:240px; object-fit:cover; border-radius:10px; margin-bottom:16px; }
+  .mph { font-size:72px; margin-bottom:16px; }
+  .mname { font-family:'Playfair Display',serif; font-size:22px; margin-bottom:6px; }
+  .mprice { font-size:22px; font-weight:700; color:var(--maroon); margin-bottom:10px; }
+  .mdesc { font-size:14px; color:var(--muted); line-height:1.6; margin-bottom:20px; }
+  .mactions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .mclose { position:absolute; top:12px; right:14px; background:none; border:none; font-size:22px; cursor:pointer; color:var(--muted); line-height:1; }
+  .mcbtn { padding:11px 22px; border-radius:99px; border:1.5px solid var(--border); background:#fff; cursor:pointer; font-family:'Lato',sans-serif; }
+ 
+  footer { background:var(--maroon); color:rgba(255,255,255,.7); text-align:center; padding:20px; font-size:13px; }
+  footer span { color:var(--gold); font-family:'Playfair Display',serif; }
+  @media(max-width:480px) { .grid { grid-template-columns:repeat(auto-fill,minmax(155px,1fr)); gap:14px; } }
+</style>
+</head>
+<body>
+ 
+<nav>
+  <div class="brand">VL Fashion Hub</div>
+  <a href="admin.html" class="ig-nav">
+          Admin Sign In
+      </a>
+</nav>
+ 
+<div class="hero">
+  <div class="badge">Handcrafted with Love</div>
+  <h1>South Indian Fashion &amp; Accessories</h1>
+  <p>Authentic handmade pieces — bangles, earrings, Maggam Work, Half Sarees &amp; more</p>
+  <a id="hero-ig" href="https://www.instagram.com/customcreations_vl?igsh=cmxhM2xkeDF1a2k=" target="_blank" class="hero-ig">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+    Order on Instagram
+  </a>
+</div>
+ 
+<div class="toolbar">
+  <input type="text" class="search" id="search" placeholder="Search products..." oninput="applyFilter()">
+  <div style="display:flex;gap:8px;flex-wrap:wrap;" id="cats"></div>
+  <span class="rcount" id="rcount"></span>
+</div>
+ 
+<div class="container">
+  <div class="grid" id="grid">
+    <div class="skeleton skel-card"></div>
+    <div class="skeleton skel-card"></div>
+    <div class="skeleton skel-card"></div>
+    <div class="skeleton skel-card"></div>
+  </div>
+</div>
+ 
+<div class="modal-bg" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="mclose" onclick="closeModal()">&#x2715;</button>
+    <div id="mph" class="mph" style="display:none"></div>
+    <img id="mimg" src="" alt="" class="mimg" style="display:none">
+    <div class="mprice" id="mprice"></div>
+    <div class="mname" id="mname"></div>
+    <div class="mdesc" id="mdesc"></div>
+    <div class="mactions">
+      <a id="mig" href="#" target="_blank" class="obtn" style="font-size:14px;padding:11px 22px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+        Order on Instagram
+      </a>
+      <button class="mcbtn" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+ 
+<footer><p>2025 <span>VL Fashion Hub</span> &middot; All orders via Instagram</p></footer>
+ 
+<!-- ─── PASTE YOUR SUPABASE CONFIG HERE ─────────────────────────── -->
+<script>
+const SUPABASE_URL = 'https://lxhmibrnvhxaucmfmpqp.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aG1pYnJudmh4YXVjbWZtcHFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NzQ1MzksImV4cCI6MjA5NzU1MDUzOX0.sFjkvrZAA9T-vLBFCWwC0bahPXK0uXNISJfQ2Xz83p8';
+</script>
+<!-- ──────────────────────────────────────────────────────────────── -->
+ 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+ 
+let allProducts = [];
+let activeFilter = 'all';
+ 
+async function init() {
+  const { data: settings } = await sb.from('settings').select('value').eq('key','instagram').single();
+  const ig = settings?.value || '';
+  const igUrl = ig ? 'https://instagram.com/' + ig : '#';
+  document.getElementById('nav-ig').href = igUrl;
+  document.getElementById('hero-ig').href = igUrl;
+ 
+  const { data: products, error } = await sb.from('products').select('*').order('created_at', { ascending: false });
+  if (error) { console.error(error); return; }
+  allProducts = products || [];
+  buildCats();
+  renderGrid(allProducts);
+}
+ 
+function igUrl() {
+  const a = document.getElementById('nav-ig');
+  return a ? a.href : '#';
+}
+ 
+function buildCats() {
+  const cats = [...new Set(allProducts.map(p => p.category))].filter(Boolean);
+  let h = '<button class="fbtn on" onclick="setFilter(\'all\')">All</button>';
+  cats.forEach(c => h += '<button class="fbtn" onclick="setFilter(\'' + esc(c) + '\')">' + esc(c) + '</button>');
+  document.getElementById('cats').innerHTML = h;
+}
+ 
+function setFilter(cat) {
+  activeFilter = cat;
+  document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('on'));
+  event.target.classList.add('on');
+  applyFilter();
+}
+ 
+function applyFilter() {
+  const q = (document.getElementById('search').value || '').toLowerCase();
+  const list = allProducts.filter(p => {
+    const mc = activeFilter === 'all' || p.category === activeFilter;
+    const mq = !q || (p.name||'').toLowerCase().includes(q) || (p.description||'').toLowerCase().includes(q) || (p.category||'').toLowerCase().includes(q);
+    return mc && mq;
+  });
+  renderGrid(list);
+}
+ 
+function renderGrid(list) {
+  document.getElementById('rcount').textContent = list.length + ' product' + (list.length !== 1 ? 's' : '');
+  const grid = document.getElementById('grid');
+  if (!list.length) {
+    grid.innerHTML = '<div class="empty"><div class="eico">' + (allProducts.length ? '🔍' : '🛍️') + '</div><h3>' + (allProducts.length ? 'Nothing found' : 'No products yet') + '</h3><p>' + (allProducts.length ? 'Try a different search.' : 'Check back soon!') + '</p></div>';
+    return;
+  }
+  const ig = igUrl();
+  grid.innerHTML = list.map(p => {
+    const imgHtml = p.image_url ? '<img class="cimg" src="' + esc(p.image_url) + '" alt="' + esc(p.name) + '" loading="lazy">' : '<div class="cph">🌸</div>';
+    const strike = p.compare_price ? '<span style="font-size:13px;color:var(--muted);text-decoration:line-through;margin-left:6px;">Rs.' + Number(p.compare_price).toLocaleString('en-IN') + '</span>' : '';
+    return '<div class="card" onclick="openModal(\'' + p.id + '\')">' + imgHtml +
+      '<div class="cbody"><div class="ccat">' + esc(p.category||'') + '</div>' +
+      '<div class="cname">' + esc(p.name) + '</div>' +
+      '<div class="cdesc">' + esc(p.description||'') + '</div>' +
+      '<div class="cfoot"><div><span class="cprice">Rs.' + Number(p.price).toLocaleString('en-IN') + '</span>' + strike + '</div>' +
+      '<a href="' + ig + '" target="_blank" class="obtn" onclick="event.stopPropagation()">' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>' +
+        'Order</a></div></div></div>';
+  }).join('');
+}
+ 
+function openModal(id) {
+  const p = allProducts.find(x => x.id == id); if (!p) return;
+  const img = document.getElementById('mimg'), ph = document.getElementById('mph');
+  if (p.image_url) { img.src = p.image_url; img.style.display='block'; ph.style.display='none'; }
+  else { ph.textContent='🌸'; ph.style.display='block'; img.style.display='none'; }
+  document.getElementById('mname').textContent = p.name;
+  document.getElementById('mprice').textContent = 'Rs.' + Number(p.price).toLocaleString('en-IN');
+  document.getElementById('mdesc').textContent = p.description || 'No description.';
+  document.getElementById('mig').href = igUrl();
+  document.getElementById('modal').classList.add('open');
+}
+ 
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+ 
+init();
+</script>
+</body>
+</html>
