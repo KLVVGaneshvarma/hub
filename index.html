@@ -34,6 +34,8 @@
   .card { background:#fff; border-radius:var(--radius); overflow:hidden; border:1px solid var(--border); transition:transform .2s,box-shadow .2s; display:flex; flex-direction:column; cursor:pointer; }
   .card:hover { transform:translateY(-4px); box-shadow:0 12px 32px rgba(0,0,0,.1); }
   .cimg { width:100%; aspect-ratio:1; object-fit:cover; display:block; }
+  .cimg-wrap { position:relative; }
+  .cimg-count { position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,.65); color:#fff; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; display:flex; align-items:center; gap:3px; }
   .cph { width:100%; aspect-ratio:1; background:linear-gradient(135deg,#f0e6d3,#e8d5b7); display:flex; align-items:center; justify-content:center; font-size:52px; }
   .cbody { padding:14px; flex:1; display:flex; flex-direction:column; }
   .ccat { font-size:11px; color:var(--gold); font-weight:700; letter-spacing:1px; text-transform:uppercase; margin-bottom:5px; }
@@ -56,6 +58,14 @@
   .modal-bg.open { display:flex; }
   .modal { background:#fff; border-radius:16px; padding:28px; max-width:440px; width:100%; text-align:center; position:relative; max-height:90vh; overflow-y:auto; }
   .mimg { width:100%; max-height:240px; object-fit:cover; border-radius:10px; margin-bottom:16px; }
+  .mgallery { position:relative; }
+  .mnav { position:absolute; top:50%; transform:translateY(-50%); width:34px; height:34px; border-radius:50%; border:none; background:rgba(0,0,0,.5); color:#fff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; }
+  .mnav-prev { left:8px; }
+  .mnav-next { right:8px; }
+  .mnav:hover { background:rgba(0,0,0,.7); }
+  .mthumbs { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:16px; }
+  .mthumb { width:48px; height:48px; object-fit:cover; border-radius:6px; cursor:pointer; border:2px solid transparent; opacity:.55; transition:all .15s; }
+  .mthumb.active { border-color:var(--maroon); opacity:1; }
   .mph { font-size:72px; margin-bottom:16px; }
   .mname { font-family:'Playfair Display',serif; font-size:22px; margin-bottom:6px; }
   .mprice { font-size:22px; font-weight:700; color:var(--maroon); margin-bottom:10px; }
@@ -73,7 +83,7 @@
  
 <nav>
   <div class="brand">VL Fashion Hub</div>
-  <a href="admin.html" class="ig-nav">
+  <a href="changesadmin.html" class="ig-nav">
     Admin Sign In
   </a>
 </nav>
@@ -106,8 +116,13 @@
 <div class="modal-bg" id="modal" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <button class="mclose" onclick="closeModal()">&#x2715;</button>
-    <div id="mph" class="mph" style="display:none"></div>
-    <img id="mimg" src="" alt="" class="mimg" style="display:none">
+    <div class="mgallery">
+      <div id="mph" class="mph" style="display:none"></div>
+      <img id="mimg" src="" alt="" class="mimg" style="display:none">
+      <button class="mnav mnav-prev" id="mnav-prev" onclick="prevImage()" style="display:none">&#x2039;</button>
+      <button class="mnav mnav-next" id="mnav-next" onclick="nextImage()" style="display:none">&#x203a;</button>
+    </div>
+    <div class="mthumbs" id="mthumbs"></div>
     <div class="mprice" id="mprice"></div>
     <div class="mname" id="mname"></div>
     <div class="mdesc" id="mdesc"></div>
@@ -189,7 +204,10 @@ function renderGrid(list) {
   }
   const ig = igUrl();
   grid.innerHTML = list.map(p => {
-    const imgHtml = p.image_url ? '<img class="cimg" src="' + esc(p.image_url) + '" alt="' + esc(p.name) + '" loading="lazy">' : '<div class="cph">🌸</div>';
+    const imgs = Array.isArray(p.image_urls) && p.image_urls.length ? p.image_urls : (p.image_url ? [p.image_url] : []);
+    const imgHtml = imgs.length
+      ? '<div class="cimg-wrap"><img class="cimg" src="' + esc(imgs[0]) + '" alt="' + esc(p.name) + '" loading="lazy">' + (imgs.length > 1 ? '<span class="cimg-count">📷 ' + imgs.length + '</span>' : '') + '</div>'
+      : '<div class="cph">🌸</div>';
     const strike = p.compare_price ? '<span style="font-size:13px;color:var(--muted);text-decoration:line-through;margin-left:6px;">Rs.' + Number(p.compare_price).toLocaleString('en-IN') + '</span>' : '';
     return '<div class="card" onclick="openModal(\'' + p.id + '\')">' + imgHtml +
       '<div class="cbody"><div class="ccat">' + esc(p.category||'') + '</div>' +
@@ -202,16 +220,33 @@ function renderGrid(list) {
   }).join('');
 }
  
+let modalImages = [];
+let modalIndex = 0;
+ 
 function openModal(id) {
   const p = allProducts.find(x => x.id == id); if (!p) return;
-  const img = document.getElementById('mimg'), ph = document.getElementById('mph');
-  if (p.image_url) { img.src = p.image_url; img.style.display='block'; ph.style.display='none'; }
-  else { ph.textContent='🌸'; ph.style.display='block'; img.style.display='none'; }
+  modalImages = Array.isArray(p.image_urls) && p.image_urls.length ? p.image_urls : (p.image_url ? [p.image_url] : []);
+  modalIndex = 0;
+  renderModalImage();
   document.getElementById('mname').textContent = p.name;
   document.getElementById('mprice').textContent = 'Rs.' + Number(p.price).toLocaleString('en-IN');
   document.getElementById('mdesc').textContent = p.description || 'No description.';
   document.getElementById('modal').classList.add('open');
 }
+ 
+function renderModalImage() {
+  const img = document.getElementById('mimg'), ph = document.getElementById('mph');
+  if (modalImages.length) { img.src = modalImages[modalIndex]; img.style.display='block'; ph.style.display='none'; }
+  else { ph.textContent='🌸'; ph.style.display='block'; img.style.display='none'; }
+  document.getElementById('mnav-prev').style.display = modalImages.length > 1 ? 'flex' : 'none';
+  document.getElementById('mnav-next').style.display = modalImages.length > 1 ? 'flex' : 'none';
+  document.getElementById('mthumbs').innerHTML = modalImages.length > 1
+    ? modalImages.map((u, i) => '<img class="mthumb' + (i === modalIndex ? ' active' : '') + '" src="' + esc(u) + '" onclick="modalIndex=' + i + ';renderModalImage()">').join('')
+    : '';
+}
+ 
+function prevImage() { modalIndex = (modalIndex - 1 + modalImages.length) % modalImages.length; renderModalImage(); }
+function nextImage() { modalIndex = (modalIndex + 1) % modalImages.length; renderModalImage(); }
  
 function closeModal() { document.getElementById('modal').classList.remove('open'); }
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
