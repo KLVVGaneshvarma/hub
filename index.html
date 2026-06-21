@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VL Fashion Hub</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap%22 rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
   :root { --gold:#C9A84C; --maroon:#800020; --maroon-dark:#5a0016; --cream:#FDF6E3; --gray:#f5f5f5; --text:#1a1a1a; --muted:#666; --border:#e0e0e0; --radius:12px; }
   * { box-sizing:border-box; margin:0; padding:0; }
@@ -73,12 +73,8 @@
  
 <nav>
   <div class="brand">VL Fashion Hub</div>
-  <a id="nav-ig" href="https://www.instagram.com/customcreations_vl?igsh=cmxhM2xkeDF1a2k=" target="_blank" class="ig-nav">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
-    Order on Instagram
-  </a>
   <a href="admin.html" class="ig-nav">
-            Admin Sign In
+    Admin Sign In
   </a>
 </nav>
  
@@ -86,7 +82,10 @@
   <div class="badge">Handcrafted with Love</div>
   <h1>South Indian Fashion &amp; Accessories</h1>
   <p>Authentic handmade pieces — bangles, earrings, Maggam Work, Half Sarees &amp; more</p>
-  
+  <a id="hero-ig" href="https://www.instagram.com/customcreations_vl?igsh=cmxhM2xkeDF1a2k=" target="_blank" class="hero-ig">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+    Order on Instagram
+  </a>
 </div>
  
 <div class="toolbar">
@@ -113,10 +112,6 @@
     <div class="mname" id="mname"></div>
     <div class="mdesc" id="mdesc"></div>
     <div class="mactions">
-      <a id="mig" href="#" target="_blank" class="obtn" style="font-size:14px;padding:11px 22px;">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
-        Order on Instagram
-      </a>
       <button class="mcbtn" onclick="closeModal()">Close</button>
     </div>
   </div>
@@ -129,7 +124,7 @@
 const SUPABASE_URL = 'https://lxhmibrnvhxaucmfmpqp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aG1pYnJudmh4YXVjbWZtcHFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NzQ1MzksImV4cCI6MjA5NzU1MDUzOX0.sFjkvrZAA9T-vLBFCWwC0bahPXK0uXNISJfQ2Xz83p8';
 </script>
-
+<!-- ──────────────────────────────────────────────────────────────── -->
  
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
@@ -137,13 +132,18 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
  
 let allProducts = [];
 let activeFilter = 'all';
+let instagramUrl = 'https://www.instagram.com/customcreations_vl?igsh=cmxhM2xkeDF1a2k=';
  
 async function init() {
-  const { data: settings } = await sb.from('settings').select('value').eq('key','instagram').single();
-  const ig = settings?.value || '';
-  const igUrl = ig ? 'https://instagram.com/' + ig : '#';
-  document.getElementById('nav-ig').href = igUrl;
-  document.getElementById('hero-ig').href = igUrl;
+  try {
+    const { data: settings, error: sErr } = await sb.from('settings').select('value').eq('key','instagram').single();
+    if (!sErr && settings?.value) {
+      instagramUrl = settings.value.startsWith('http') ? settings.value : 'https://instagram.com/' + settings.value;
+    }
+  } catch (e) {
+    console.warn('Could not load instagram setting from Supabase, using default link', e);
+  }
+  document.getElementById('hero-ig').href = instagramUrl;
  
   const { data: products, error } = await sb.from('products').select('*').order('created_at', { ascending: false });
   if (error) { console.error(error); return; }
@@ -153,8 +153,7 @@ async function init() {
 }
  
 function igUrl() {
-  const a = document.getElementById('nav-ig');
-  return a ? a.href : '#';
+  return instagramUrl;
 }
  
 function buildCats() {
@@ -211,7 +210,6 @@ function openModal(id) {
   document.getElementById('mname').textContent = p.name;
   document.getElementById('mprice').textContent = 'Rs.' + Number(p.price).toLocaleString('en-IN');
   document.getElementById('mdesc').textContent = p.description || 'No description.';
-  document.getElementById('mig').href = igUrl();
   document.getElementById('modal').classList.add('open');
 }
  
